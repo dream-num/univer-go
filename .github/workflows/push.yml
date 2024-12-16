@@ -23,7 +23,7 @@ jobs:
             - uses: actions/checkout@v4
               with:
                   repository: dream-num/univer-desktop
-                  ref: feat/msi
+                  ref: feat/dmg-appimage
                   token: ${{ secrets.GH_TOKEN }}
                   submodules: true
 
