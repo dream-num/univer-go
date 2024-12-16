@@ -31,7 +31,7 @@ jobs:
 
             - run: pnpm i
 
-            - run:
+            - run: |
                 cd app
                 pnpm version ${{ inputs.version }}
 
