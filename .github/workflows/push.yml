@@ -61,11 +61,11 @@ jobs:
               with:
                 name: ${{ matrix.os }}-nightly
                 path: |
-                  out/make/**/*.zip
-                  out/make/**/*.exe
-                  out/make/**/*.AppImage
-                  out/make/**/*.yml
-                  out/make/**/*.dmg
+                  app/out/make/**/*.zip
+                  app/out/make/**/*.exe
+                  app/out/make/**/*.AppImage
+                  app/out/make/**/*.yml
+                  app/out/make/**/*.dmg
 
                 retention-days: 7
                       
@@ -74,11 +74,11 @@ jobs:
               uses: actions/attest-build-provenance@v1
               with:
                 subject-path: |
-                  out/make/**/*.dmg
-                  out/make/**/*.zip
-                  out/make/**/*.exe
-                  out/make/**/*.AppImage
-                  out/make/**/*.yml
+                  app/out/make/**/*.dmg
+                  app/out/make/**/*.zip
+                  app/out/make/**/*.exe
+                  app/out/make/**/*.AppImage
+                  app/out/make/**/*.yml
                   
 
             - name: Create Nightly Release
@@ -89,11 +89,11 @@ jobs:
                 prerelease: true
                 tag_name: ${{ inputs.version }}
                 files: |
-                  out/make/**/*.dmg
-                  out/make/**/*.zip
-                  out/make/**/*.exe
-                  out/make/**/*.AppImage
-                  out/make/**/*.yml
+                  app/out/make/**/*.dmg
+                  app/out/make/**/*.zip
+                  app/out/make/**/*.exe
+                  app/out/make/**/*.AppImage
+                  app/out/make/**/*.yml
 
                 body: |
                   This is an automated nightly release for testing purposes.
