@@ -1,0 +1,71 @@
+name: ⚓ Push
+
+on:
+    workflow_dispatch:
+      inputs:
+          version:
+              type: string
+              default: 0.0.1
+
+jobs:
+    build-binary:
+        name: BuildBinary
+        strategy:
+            fail-fast: true
+            matrix:
+                os: [windows-latest, macos-latest]
+        runs-on: ${{ matrix.os }}
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  repository: dream-num/univer-desktop
+                  token: ${{ secrets.GH_TOKEN }}
+                  submodules: true
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '22'
+
+            - run: pnpm i
+
+            - run:
+                cd app
+                pnpm version ${{ inputs.version }}
+
+            - name: Install appdmg
+              if: matrix.os == 'macos-latest'
+              run: pnpm add -g appdmg
+
+            - run: pnpm make
+
+            - uses: hexf00/upload-to-oss@v2
+              with:
+                  files: |
+                      out/make/**/*.dmg
+                      out/make/**/*.zip
+                      out/make/**/*.exe
+                      out/make/**/*.AppImage
+                      out/make/**/*.yml
+                  dest: test/staging/
+                  bucket: release-univer
+                  region: oss-cn-shenzhen
+                  accessKeyId: ${{secrets.S3_ACCESS_KEY_ID}}
+                  accessKeySecret: ${{secrets.S3_ACCESS_KEY_SECRET}}
+                  timeout: 1200s
+    
+            - name: Generate artifact attestation
+              continue-on-error: true
+              uses: actions/attest-build-provenance@v1
+              with:
+                subject-path: |
+                  out/make/**/*.dmg
+                  out/make/**/*.zip
+                  out/make/**/*.exe
+                  out/make/**/*.AppImage
+                  out/make/**/*.yml
+                  dist/manifest.yml
+                  dist/*.tar.gz
+      
