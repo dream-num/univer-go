@@ -44,19 +44,32 @@ jobs:
             - uses: hexf00/upload-to-oss@v2
               with:
                   files: |
-                      out/make/**/*.dmg
-                      out/make/**/*.zip
-                      out/make/**/*.exe
-                      out/make/**/*.AppImage
-                      out/make/**/*.yml
+                      app/out/make/**/*.dmg
+                      app/out/make/**/*.zip
+                      app/out/make/**/*.exe
+                      app/out/make/**/*.AppImage
+                      app/out/make/**/*.yml
                   dest: test/staging/
                   bucket: release-univer
                   region: oss-cn-shenzhen
                   accessKeyId: ${{secrets.S3_ACCESS_KEY_ID}}
                   accessKeySecret: ${{secrets.S3_ACCESS_KEY_SECRET}}
                   timeout: 1200s
-    
-            - name: Generate artifact attestation
+
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                name: ${{ matrix.os }}-nightly
+                path: |
+                  out/make/**/*.zip
+                  out/make/**/*.exe
+                  out/make/**/*.AppImage
+                  out/make/**/*.yml
+                  out/make/**/*.dmg
+
+                retention-days: 7
+                      
+            - name: 签名
               continue-on-error: true
               uses: actions/attest-build-provenance@v1
               with:
@@ -66,6 +79,24 @@ jobs:
                   out/make/**/*.exe
                   out/make/**/*.AppImage
                   out/make/**/*.yml
-                  dist/manifest.yml
-                  dist/*.tar.gz
-      
+                  
+
+            - name: Create Nightly Release
+              uses: softprops/action-gh-release@v2
+              with:
+                name: Nightly ${{ inputs.version }}
+                draft: false
+                prerelease: true
+                tag_name: ${{ inputs.version }}
+                files: |
+                  out/make/**/*.dmg
+                  out/make/**/*.zip
+                  out/make/**/*.exe
+                  out/make/**/*.AppImage
+                  out/make/**/*.yml
+
+                body: |
+                  This is an automated nightly release for testing purposes.
+                  Version: ${{ inputs.version }}
+
+                  **Warning:** This build may be unstable and is not recommended for production use.
