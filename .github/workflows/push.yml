@@ -33,7 +33,7 @@ jobs:
 
             - run: |
                 cd app
-                pnpm version ${{ inputs.version }}
+                pnpm version ${{ inputs.version }} --allow-same-version --no-git-tag-version
 
             - name: Install appdmg
               if: matrix.os == 'macos-latest'
