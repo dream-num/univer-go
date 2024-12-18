@@ -4,8 +4,9 @@ on:
     workflow_dispatch:
       inputs:
           version:
+              description: version(optional)
               type: string
-              default: 0.0.1
+              default: 
           ref:
               type: string
               default: dev
@@ -37,6 +38,52 @@ jobs:
               with:
                   node-version: '22'
 
+            - name: Set version
+              id: set_version
+              shell: bash
+              run: |
+                if [ -z "${{ inputs.version }}" ]; then
+                  cd app
+                  APP_VERSION=$(node -e 'console.log(require("./package.json").version)')
+                  COMMIT_HASH=$(git rev-parse --short=7 HEAD)
+                  echo "version=${APP_VERSION}-dev.${COMMIT_HASH}" >> $GITHUB_OUTPUT
+                else
+                  echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+                fi
+
+            - name: Determine version type
+              id: version_type
+              shell: bash
+              run: |
+                VERSION="${{ steps.set_version.outputs.version }}"
+                
+                if [[ $VERSION == *"-dev"* ]]; then
+                  echo "is_dev=true" >> $GITHUB_OUTPUT
+                  echo "is_stable=false" >> $GITHUB_OUTPUT
+                elif [[ $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                  echo "is_dev=false" >> $GITHUB_OUTPUT
+                  echo "is_stable=true" >> $GITHUB_OUTPUT
+                else
+                  echo "is_dev=false" >> $GITHUB_OUTPUT
+                  echo "is_stable=false" >> $GITHUB_OUTPUT
+                fi
+
+            - name: init dest
+              id: init_dest
+              shell: bash
+              run: |
+                if [ ${{ steps.version_type.outputs.is_stable }} = true ]; then
+                  echo "dest=univer-go/latest/" >> $GITHUB_OUTPUT
+                else
+                  echo "dest=test/staging/" >> $GITHUB_OUTPUT
+                fi
+
+            - name: Print version
+              run: |
+                  echo "Version: ${{ steps.set_version.outputs.version }}"
+                  echo "Is Dev: ${{ steps.version_type.outputs.is_dev }}"
+                  echo "Is Stable: ${{ steps.version_type.outputs.is_stable }}"
+
             - name: Install Python setuptools
               if: matrix.os == 'macos-latest'
               run: brew install python-setuptools
@@ -49,9 +96,12 @@ jobs:
 
             - run: |
                 cd app
-                pnpm version ${{ inputs.version }} --allow-same-version --no-git-tag-version
+                pnpm version ${{ steps.set_version.outputs.version }} --allow-same-version --no-git-tag-version
 
-            - run: pnpm make
+            - name: Make
+              shell: bash
+              run: |
+                RELEASE_CHANNEL=$({{ steps.version_type.outputs.is_dev }} ? "development" : "production") pnpm make
 
             - uses: hexf00/upload-to-oss@v2
               with:
@@ -61,12 +111,25 @@ jobs:
                       app/out/make/**/*.exe
                       app/out/make/**/*.AppImage
                       app/out/make/**/*.yml
-                  dest: test/staging/
+                  dest: ${{ steps.init_dest.outputs.dest }}
                   bucket: release-univer
                   region: oss-cn-shenzhen
                   accessKeyId: ${{secrets.S3_ACCESS_KEY_ID}}
                   accessKeySecret: ${{secrets.S3_ACCESS_KEY_SECRET}}
                   timeout: 1200s
+
+            - uses: hexf00/upload-to-oss@v2
+              if: ${{ steps.version_type.outputs.is_stable || steps.version_type.outputs.is_dev }}
+              continue-on-error: true
+              with:
+                files: |
+                    app/out/make/**/*.yml
+                dest: ${{ steps.init_dest.outputs.dest }}
+                bucket: release-univer
+                region: oss-cn-shenzhen
+                accessKeyId: ${{secrets.S3_ACCESS_KEY_ID}}
+                accessKeySecret: ${{secrets.S3_ACCESS_KEY_SECRET}}
+                timeout: 1200s
 
             - name: Upload artifacts
               uses: actions/upload-artifact@v4
@@ -81,25 +144,13 @@ jobs:
 
                 retention-days: 7
                       
-            - name: calc hash
-              continue-on-error: true
-              uses: actions/attest-build-provenance@v1
-              with:
-                subject-path: |
-                  app/out/make/**/*.dmg
-                  app/out/make/**/*.zip
-                  app/out/make/**/*.exe
-                  app/out/make/**/*.AppImage
-                  app/out/make/**/*.yml
-                  
-
-            - name: Create Nightly Release
+            - name: Create Dev Release
               uses: softprops/action-gh-release@v2
               with:
-                name: Nightly ${{ inputs.version }}
+                name: Release ${{ steps.set_version.outputs.version }}
                 draft: false
-                prerelease: true
-                tag_name: ${{ inputs.version }}
+                prerelease: ${{ !steps.version_type.outputs.is_stable }}
+                tag_name: ${{ steps.set_version.outputs.version }}
                 files: |
                   app/out/make/**/*.dmg
                   app/out/make/**/*.zip
@@ -109,6 +160,6 @@ jobs:
 
                 body: |
                   This is an automated nightly release for testing purposes.
-                  Version: ${{ inputs.version }}
+                  Version: ${{ steps.set_version.outputs.version }}
 
                   **Warning:** This build may be unstable and is not recommended for production use.
