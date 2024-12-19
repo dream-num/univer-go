@@ -144,19 +144,6 @@ jobs:
                 accessKeySecret: ${{secrets.S3_ACCESS_KEY_SECRET}}
                 timeout: 1200s
 
-            - name: Upload artifacts
-              uses: actions/upload-artifact@v4
-              with:
-                name: ${{ matrix.os }}-nightly
-                path: |
-                  app/out/make/**/*.zip
-                  app/out/make/**/*.exe
-                  app/out/make/**/*.AppImage
-                  app/out/make/**/*.yml
-                  app/out/make/**/*.dmg
-
-                retention-days: 7
-                      
             - name: Create Dev Release
               uses: softprops/action-gh-release@v2
               with:
@@ -172,7 +159,10 @@ jobs:
                   app/out/make/**/*.yml
 
                 body: |
-                  This is an automated nightly release for testing purposes.
+                  ${{ !steps.version_type.outputs.is_stable && 'This is an automated nightly release for testing purposes.' || '' }}
                   Version: ${{ steps.set_version.outputs.version }}
+                  Version Info:
+                  - is_stable: ${{ steps.version_type.outputs.is_stable }}
+                  - is_dev: ${{ steps.version_type.outputs.is_dev }}
 
-                  **Warning:** This build may be unstable and is not recommended for production use.
+                  ${{ !steps.version_type.outputs.is_stable && '**Warning:** This build may be unstable and is not recommended for production use.' || '' }}
