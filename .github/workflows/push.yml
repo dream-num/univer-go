@@ -10,6 +10,24 @@ on:
           ref:
               type: string
               default: dev
+    workflow_call:
+      inputs:
+          version:
+              description: version(optional)
+              type: string
+              required: false
+          ref:
+              type: string
+              description: The branch or tag to checkout
+              default: dev
+              required: false
+      secrets:
+          GH_TOKEN:
+              required: true
+          S3_ACCESS_KEY_ID:
+              required: true
+          S3_ACCESS_KEY_SECRET:
+              required: true
 
 jobs:
     build-binary:
