@@ -144,6 +144,10 @@ jobs:
               if: matrix.os == 'macos-latest'
               run: pnpm add -g appdmg
 
+            - name: fix npm error
+              shell: bash
+              run: git config --global url.https://${{ secrets.GH_TOKEN }}@github.com/.insteadOf https://github.com/
+
             - run: pnpm i
 
             - run: |
