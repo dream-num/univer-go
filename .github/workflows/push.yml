@@ -68,16 +68,26 @@ jobs:
                   echo "is_stable=false" >> $GITHUB_OUTPUT
                 fi
 
+            - name: Determine release channel
+              id: release_channel
+              shell: bash
+              run: |
+                if [ "${{ steps.version_type.outputs.is_dev }}" = "true" ]; then
+                  echo "channel=development" >> $GITHUB_OUTPUT
+                else
+                  echo "channel=production" >> $GITHUB_OUTPUT
+                fi
+
             - name: init dest
               id: init_dest
               shell: bash
               run: |
-                if [ ${{ steps.version_type.outputs.is_stable }} = true ]; then
-                  echo "dest=univer-go/latest/" >> $GITHUB_OUTPUT
-                else
+                if [ ${{ steps.release_channel.outputs.channel }} = "development" ]; then
                   echo "dest=test/staging/" >> $GITHUB_OUTPUT
+                else
+                  echo "dest=univer-go/latest/" >> $GITHUB_OUTPUT
                 fi
-
+  
             - name: Print Release Info
               shell: bash
               run: |
@@ -85,7 +95,7 @@ jobs:
                   echo "Is Dev: ${{ steps.version_type.outputs.is_dev }}"
                   echo "Is Stable: ${{ steps.version_type.outputs.is_stable }}"
                   echo "Dest: ${{ steps.init_dest.outputs.dest }}"
-                  echo "RELEASE_CHANNEL=$(${{ steps.version_type.outputs.is_dev }} ? "development" : "production")"
+                  echo "RELEASE_CHANNEL: ${{ steps.release_channel.outputs.channel }}"
 
             - name: Install Python setuptools
               if: matrix.os == 'macos-latest'
@@ -104,7 +114,7 @@ jobs:
             - name: Make
               shell: bash
               run: |
-                RELEASE_CHANNEL=$(${{ steps.version_type.outputs.is_dev }} ? "development" : "production") pnpm make
+                RELEASE_CHANNEL=${{ steps.release_channel.outputs.channel }} pnpm make
 
             - uses: hexf00/upload-to-oss@v2
               with:
