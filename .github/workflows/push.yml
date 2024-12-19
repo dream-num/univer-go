@@ -69,7 +69,7 @@ jobs:
                   DEV_RELEASES=$(gh release list -R ${{ github.repository }} --limit 100 | grep "${APP_VERSION}-dev" | wc -l)
                   BUILD_NUMBER=$((DEV_RELEASES + 1))
                   
-                  echo "version=${APP_VERSION}-dev.${BUILD_NUMBER}.${COMMIT_HASH}" >> $GITHUB_OUTPUT
+                  echo "version=${APP_VERSION}-dev.${BUILD_NUMBER}-${COMMIT_HASH}" >> $GITHUB_OUTPUT
                 else
                   echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
                 fi
