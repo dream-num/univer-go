@@ -73,6 +73,8 @@ jobs:
                 else
                   echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
                 fi
+              env:
+                GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
             - name: Determine version type
               id: version_type
