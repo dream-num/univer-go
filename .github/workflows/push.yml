@@ -175,7 +175,7 @@ jobs:
                   timeout: 1200s
 
             - uses: hexf00/upload-to-oss@v2
-              if: ${{ steps.version_type.outputs.is_stable || steps.version_type.outputs.is_dev }}
+              if: ${{ steps.version_type.outputs.is_stable == 'false' || steps.version_type.outputs.is_dev == 'true' }}
               continue-on-error: true
               with:
                 files: |
@@ -192,7 +192,7 @@ jobs:
               with:
                 name: Release ${{ steps.set_version.outputs.version }}
                 draft: false
-                prerelease: ${{ !steps.version_type.outputs.is_stable }}
+                prerelease: ${{ steps.version_type.outputs.is_stable == 'false' }}
                 tag_name: ${{ steps.set_version.outputs.version }}
                 files: |
                   app/out/make/**/*.dmg
