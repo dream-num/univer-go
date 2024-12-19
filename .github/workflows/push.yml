@@ -79,6 +79,7 @@ jobs:
                 fi
 
             - name: Print Release Info
+              shell: bash
               run: |
                   echo "Version: ${{ steps.set_version.outputs.version }}"
                   echo "Is Dev: ${{ steps.version_type.outputs.is_dev }}"
