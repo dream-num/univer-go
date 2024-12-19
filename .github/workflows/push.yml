@@ -78,11 +78,12 @@ jobs:
                   echo "dest=test/staging/" >> $GITHUB_OUTPUT
                 fi
 
-            - name: Print version
+            - name: Print Release Info
               run: |
                   echo "Version: ${{ steps.set_version.outputs.version }}"
                   echo "Is Dev: ${{ steps.version_type.outputs.is_dev }}"
                   echo "Is Stable: ${{ steps.version_type.outputs.is_stable }}"
+                  echo "Dest: ${{ steps.init_dest.outputs.dest }}"
                   echo "RELEASE_CHANNEL=$(${{ steps.version_type.outputs.is_dev }} ? "development" : "production")"
 
             - name: Install Python setuptools
