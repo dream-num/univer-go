@@ -64,13 +64,18 @@ jobs:
                 if [ -z "${{ inputs.version }}" ]; then
                   cd app
                   APP_VERSION=$(node -e 'console.log(require("./package.json").version)')
-                  COMMIT_HASH=$(git rev-parse --short=7 HEAD)
-                  
-                  # get dev release count
-                  DEV_RELEASES=$(gh release list -R ${{ github.repository }} --limit 100 | grep "${APP_VERSION}-dev" | wc -l)
-                  BUILD_NUMBER=$((DEV_RELEASES + 1))
-                  
-                  echo "version=${APP_VERSION}-dev.${BUILD_NUMBER}-${COMMIT_HASH}" >> $GITHUB_OUTPUT
+
+                  if [ ${{ github.repository }} = "dream-num/univer-go" ]; then
+                    echo "version=${APP_VERSION}" >> $GITHUB_OUTPUT
+                  else
+                    COMMIT_HASH=$(git rev-parse --short=7 HEAD)
+                    
+                    # get dev release count
+                    DEV_RELEASES=$(gh release list -R ${{ github.repository }} --limit 100 | grep "${APP_VERSION}-dev" | wc -l)
+                    BUILD_NUMBER=$((DEV_RELEASES + 1))
+                    
+                    echo "version=${APP_VERSION}-dev.${BUILD_NUMBER}-${COMMIT_HASH}" >> $GITHUB_OUTPUT
+                  fi
                 else
                   echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
                 fi
@@ -92,6 +97,14 @@ jobs:
                 else
                   echo "is_dev=false" >> $GITHUB_OUTPUT
                   echo "is_stable=false" >> $GITHUB_OUTPUT
+                fi
+
+            - name: Check version
+              if: ${{ github.repository == 'dream-num/univer-go' }}
+              shell: bash
+              run: |
+                if [ ${{ steps.version_type.outputs.is_dev }} = "true" ]; then
+                  exit 1
                 fi
 
             - name: Determine release channel
