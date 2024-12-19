@@ -83,6 +83,7 @@ jobs:
                   echo "Version: ${{ steps.set_version.outputs.version }}"
                   echo "Is Dev: ${{ steps.version_type.outputs.is_dev }}"
                   echo "Is Stable: ${{ steps.version_type.outputs.is_stable }}"
+                  echo "RELEASE_CHANNEL=$(${{ steps.version_type.outputs.is_dev }} ? "development" : "production")"
 
             - name: Install Python setuptools
               if: matrix.os == 'macos-latest'
@@ -101,7 +102,7 @@ jobs:
             - name: Make
               shell: bash
               run: |
-                RELEASE_CHANNEL=$({{ steps.version_type.outputs.is_dev }} ? "development" : "production") pnpm make
+                RELEASE_CHANNEL=$(${{ steps.version_type.outputs.is_dev }} ? "development" : "production") pnpm make
 
             - uses: hexf00/upload-to-oss@v2
               with:
