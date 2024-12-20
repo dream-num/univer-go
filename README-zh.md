@@ -18,4 +18,4 @@
 
 请访问我们的网站了解更多信息：https://go.univer.ai/ ，欢迎加入Univer Go社区共建。
 
-
+![wechat](./images/wechat.jpg)
