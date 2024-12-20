@@ -175,7 +175,7 @@ jobs:
                   timeout: 1200s
 
             - uses: hexf00/upload-to-oss@v2
-              if: ${{ steps.version_type.outputs.is_stable == 'false' || steps.version_type.outputs.is_dev == 'true' }}
+              if: ${{ steps.version_type.outputs.is_stable == 'true' || steps.version_type.outputs.is_dev == 'true' }}
               continue-on-error: true
               with:
                 files: |
