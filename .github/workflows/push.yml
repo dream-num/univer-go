@@ -65,13 +65,12 @@ jobs:
                   cd app
                   APP_VERSION=$(node -e 'console.log(require("./package.json").version)')
 
-                  if [ ${{ github.repository }} = "dream-num/univer-go" ]; then
+                  if [ "${{ github.repository }}" = "dream-num/univer-go" ]; then
                     echo "version=${APP_VERSION}" >> $GITHUB_OUTPUT
                   else
                     COMMIT_HASH=$(git rev-parse --short=7 HEAD)
-                    
                     # get dev release count
-                    DEV_RELEASES=$(gh release list -R ${{ github.repository }} --limit 100 | grep "${APP_VERSION}-dev" | wc -l)
+                    DEV_RELEASES=$(gh release list -R ${{ github.repository }} --limit 100 | grep "${APP_VERSION}-dev" | wc -l || true)
                     BUILD_NUMBER=$((DEV_RELEASES + 1))
                     
                     echo "version=${APP_VERSION}-dev.${BUILD_NUMBER}-${COMMIT_HASH}" >> $GITHUB_OUTPUT
