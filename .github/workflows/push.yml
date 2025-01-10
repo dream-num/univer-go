@@ -29,6 +29,14 @@ on:
               required: true
           S3_ACCESS_KEY_SECRET:
               required: true
+          GO_BUILD_CERTIFICATE_BASE64:
+              required: true
+          GO_P12_PASSWORD:
+              required: true
+          GO_BUILD_PROVISION_PROFILE_BASE64:
+              required: true
+          GO_KEYCHAIN_PASSWORD:
+              required: true
 
 jobs:
     build-binary:
