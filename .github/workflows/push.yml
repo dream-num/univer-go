@@ -37,6 +37,12 @@ on:
               required: true
           GO_KEYCHAIN_PASSWORD:
               required: true
+          APPLE_ID:
+              required: true
+          APPLE_PASSWORD:
+              required: true
+          APPLE_TEAM_ID:
+              required: true              
 
 jobs:
     build-binary:
@@ -48,7 +54,7 @@ jobs:
         strategy:
             fail-fast: true
             matrix:
-                os: [windows-latest, macos-latest]
+                os: [macos-latest]
         runs-on: ${{ matrix.os }}
         steps:
             - uses: actions/checkout@v4
@@ -192,7 +198,19 @@ jobs:
                 cd app
                 pnpm version ${{ steps.set_version.outputs.version }} --allow-same-version --no-git-tag-version
 
+            - name: Make (macOS)
+              if: matrix.os == 'macos-latest'
+              env:
+                APPLE_ID: ${{ secrets.APPLE_ID }}
+                APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+                APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+                KEYCHAIN_PATH: ${{ runner.temp }}/app-signing.keychain-db
+              shell: bash
+              run: |
+                  RELEASE_CHANNEL=${{ steps.release_channel.outputs.channel }} pnpm make
+
             - name: Make
+              if: matrix.os != 'macos-latest'
               shell: bash
               run: |
                 RELEASE_CHANNEL=${{ steps.release_channel.outputs.channel }} pnpm make
