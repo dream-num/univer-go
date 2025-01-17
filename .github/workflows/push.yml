@@ -246,6 +246,7 @@ jobs:
 
             - name: Create Release
               uses: softprops/action-gh-release@v2
+              if: ${{ steps.version_type.outputs.is_stable == 'true' }}
               with:
                 name: Release ${{ steps.set_version.outputs.version }}
                 draft: false
