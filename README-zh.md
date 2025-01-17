@@ -16,6 +16,4 @@
 
 当前 Univer Go 为 MVP 版本，后续我们将增强更多功能，正在积极完善中。我们相信，Univer Go 将极大提升您的工作效率，助力您实现更智能的业务流程。感谢大家的支持与关注，期待您体验 Univer Go 带来的便利与创新！
 
-请访问我们的网站了解更多信息：https://go.univer.ai/ ，欢迎加入Univer Go社区共建。
-
-![wechat](./images/wechat.jpg)
+请访问我们的网站了解更多信息：https://go.univer.ai/ ，欢迎加入Univer Go社区共建，[加群方式](https://docs.univer.ai/zh-CN/guides/go/getting-started/feedback)。
