@@ -224,7 +224,6 @@ jobs:
                       app/out/make/**/*.zip
                       app/out/make/**/*.exe
                       app/out/make/**/*.AppImage
-                      app/out/make/**/*.yml
                   dest: ${{ steps.init_dest.outputs.dest }}
                   bucket: release-univer
                   region: oss-cn-shenzhen
@@ -233,7 +232,7 @@ jobs:
                   timeout: 1200s
 
             - uses: hexf00/upload-to-oss@v2
-              if: ${{ steps.version_type.outputs.is_stable == 'true' || steps.version_type.outputs.is_dev == 'true' }}
+              if: ${{ steps.version_type.outputs.is_stable == 'true' }}
               continue-on-error: true
               with:
                 files: |
@@ -245,7 +244,7 @@ jobs:
                 accessKeySecret: ${{secrets.S3_ACCESS_KEY_SECRET}}
                 timeout: 1200s
 
-            - name: Create Release
+            - name: Create Release (stable)
               uses: softprops/action-gh-release@v2
               if: ${{ steps.version_type.outputs.is_stable == 'true' }}
               with:
